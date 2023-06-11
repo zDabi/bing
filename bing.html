@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: black;
+    }
+
+    #game-container {
+      position: relative;
+      width: 900px;
+      height: 400px;
+      background-color: white;
+      border: 2px solid gray;
+    }
+
+    #paddle-left, #paddle-right {
+      position: absolute;
+      width: 10px;
+      height: 60px;
+      background-color: gray;
+    }
+
+    #paddle-left {
+      left: 10px;
+      top: 170px;
+    }
+
+    #paddle-right {
+      right: 10px;
+      top: 170px;
+    }
+
+    #ball {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+    }
+
+    #scoreboard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: black;
+      background-color: blue;
+      font-style: initial;
+      font-size: 24px
+      ;
+    }
+  </style>
+  <title>Pingo Pongo</title>
+
+</head>
+<body>
+  <div id="game-container">
+    <div id="paddle-left"></div>
+    <div id="paddle-right"></div>
+    <div id="ball"></div>
+    <div id="scoreboard">0 - 0</div>
+  </div>
+
+  <script>
+    const gameContainer = document.getElementById('game-container');
+    const paddleLeft = document.getElementById('paddle-left');
+    const paddleRight = document.getElementById('paddle-right');
+    const ball = document.getElementById('ball');
+    const scoreboard = document.getElementById('scoreboard');
+    const containerWidth = gameContainer.offsetWidth;
+    const containerHeight = gameContainer.offsetHeight;
+    const paddleHeight = paddleLeft.offsetHeight;
+    const paddleSpeed = 5;
+    let ballX = containerWidth / 2;
+    let ballY = containerHeight / 2;
+    let ballSpeedX = -2;
+    let ballSpeedY = 2;
+    let scoreLeft = 0;
+    let scoreRight = 0;
+
+    const keysPressed = {};
+
+    function movePaddle() {
+      if (keysPressed.ArrowUp && paddleRight.offsetTop > 0) {
+        paddleRight.style.top = paddleRight.offsetTop - paddleSpeed + 'px';
+      } else if (keysPressed.ArrowDown && paddleRight.offsetTop + paddleHeight < containerHeight) {
+        paddleRight.style.top = paddleRight.offsetTop + paddleSpeed + 'px';
+      }
+
+      if (keysPressed.KeyW && paddleLeft.offsetTop > 0) {
+        paddleLeft.style.top = paddleLeft.offsetTop - paddleSpeed + 'px';
+      } else if (keysPressed.KeyS && paddleLeft.offsetTop + paddleHeight < containerHeight) {
+        paddleLeft.style.top = paddleLeft.offsetTop + paddleSpeed + 'px';
+      }
+    }
+
+    function keydownHandler(event) {
+      keysPressed[event.code] = true;
+    }
+
+    function keyupHandler(event) {
+      keysPressed[event.code] = false;
+    }
+
+    function updateBall() {
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
+
+      // Collision detection with paddles
+      const paddleLeftTop = paddleLeft.offsetTop;
+      const paddleRightTop = paddleRight.offsetTop;
+
+      if (
+        ballX <= 20 && ballY + 15 >= paddleLeftTop && ballY <= paddleLeftTop + paddleHeight ||
+        ballX >= containerWidth - 35 && ballY + 15 >= paddleRightTop && ballY <= paddleRightTop + paddleHeight
+      ) {
+        ballSpeedX *= -1;
+      }
+
+      // Collision detection with top and bottom walls
+      if (ballY <= 0 || ballY >= containerHeight - 15) {
+        ballSpeedY *= -1;
+      }
+
+      // Check if the ball is out of bounds
+      if (ballX < 0) {
+        scoreRight++;
+        resetGame();
+      } else if (ballX > containerWidth) {
+        scoreLeft++;
+        resetGame();
+      }
+
+      ball.style.left = ballX + 'px';
+      ball.style.top = ballY + 'px';
+
+      scoreboard.textContent = scoreLeft + ' - ' + scoreRight;
+    }
+
+    function resetGame() {
+      ballX = containerWidth / 2;
+      ballY = containerHeight / 2;
+      ballSpeedX = -2;
+      ballSpeedY = 2;
+    }
+
+    setInterval(movePaddle, 10);
+    setInterval(updateBall, 10);
+
+    document.addEventListener('keydown', keydownHandler);
+    document.addEventListener('keyup', keyupHandler);
+  </script>
+</body>
+</html>
+
+
